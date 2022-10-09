@@ -1,0 +1,80 @@
+path = 'C:/Users/jorda/OneDrive/Desktop/PyCharm Community Edition 2021.2.2/5067 ML Code/Lab3 ' \
+       'Decision Tree and KNN/'
+df1 = pd.read_csv(path + 'rawdat.csv')
+df1.describe()
+
+trainX = df1.iloc[:19, :5]
+testX = df1.iloc[19:, :5]
+trainY = df1.iloc[:19, 5]
+testY = df1.iloc[19:, 5] # don't use
+#print(trainX)
+#print(testX)
+#print(trainY)
+
+trainX = trainX.to_numpy()
+testX = testX.to_numpy()
+trainY = trainY.to_numpy()
+
+#print(trainX)
+#print(testX)
+
+def myKNN(trainX,trainY,testX,distance,K):
+    """In this function, trainX is the training input features, trainY is the training labels,
+    testX is the test dataset, distance determines the distance metric and can be 1, 2, 3
+    (3 for Chebyshev). Also, K is the KNN parameter."""
+    dict_final ={}
+    row_sum = 0
+    for i in testX:
+        print(i)
+        #i is each row of the test set:
+        m_dict = {}  # renew for every new row of testX
+        for j in trainX:
+            #j is each row of the test set, all train rows should go to each test row
+            print(j)
+            for k in range(4):  # hard coding for simplicity
+                # j is each feature entry
+                print(int(i[k + 1]), int(j[k + 1]))  # wanting to skip the ID col
+                if distance == 1:
+                    # Manhattan
+                    row_sum += abs(int(i[k + 1]) - int(j[k + 1]))
+                if distance ==2:
+                    #Euclidean Distance
+                    row_sum += (int(i[k + 1]) - int(j[k + 1]))**2
+                if distance == 3:
+                    # Chebyshev
+                    if abs(int(i[k + 1]) - int(j[k + 1])) > row_sum:
+                        row_sum = abs(int(i[k + 1]) - int(j[k + 1]))
+                        print('new Row Sum', row_sum)
+            if distance == 2:
+                row_sum = sqrt(row_sum)
+            m_dict[j[0]] = row_sum  # adding value and row ID into a dictionary
+            row_sum = 0 # reset for next calculation
+            print('adding to dict', m_dict)
+        close_keys = sorted(m_dict, key=m_dict.get, reverse=False)[:K]#trying to get the k
+        target = []
+        for q in close_keys:
+            target.append(trainY[q-1]) # get the row of the target
+        # if need be, I could convert the list into the most common single value:
+        dict_final[i[0]] = target # add mode right here?
+        #m_lister.append(close_keys) # put it in a dictionary instead!
+
+
+    return dict_final # returns list of top K votes
+
+
+
+Mank1 = myKNN(trainX,trainY,testX,1,1)
+Mank3 = myKNN(trainX,trainY,testX,1,3)
+print(Mank1)
+#{20: [12], 21: [13], 22: [14], 23: [15], 24: [16]}
+print(Mank3)
+
+EuK1 = myKNN(trainX,trainY,testX,2,1)
+EuK3 = myKNN(trainX,trainY,testX,2,3)
+print(EuK1)
+print(EuK3)
+
+ChebK1 = myKNN(trainX,trainY,testX,3,1)
+ChebK3 = myKNN(trainX,trainY,testX,3,3)
+print(ChebK1)
+print(ChebK3)
